@@ -1,27 +1,20 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FilterForm } from "@/components/FilterForm";
 import { Pagination } from "@/components/Pagination";
 import { PostsTable } from "@/components/PostsTable";
+import { usePostsStore } from "@/stores/posts-store";
 import {
+  EMPTY_POST_FILTERS,
   buildPostsPagePath,
   buildPostsUrl,
-  createPageNumbers,
   getFiltersFromSearchParams,
   getPageFromSearchParams,
-  getTotalPages,
   parseTotalCount,
 } from "@/utils/posts";
 import type { Post, PostFilters } from "@/types/posts";
-
-const initialFilters: PostFilters = {
-  userId: "",
-  postId: "",
-  title: "",
-  body: "",
-};
 
 export default function Home() {
   return (
@@ -58,19 +51,17 @@ type PostsPageContentProps = {
 
 function PostsPageContent({ activeFilters, page }: PostsPageContentProps) {
   const router = useRouter();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [draftFilters, setDraftFilters] = useState<PostFilters>(activeFilters);
-  const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
+  const isLoading = usePostsStore((state) => state.isLoading);
+  const startLoading = usePostsStore((state) => state.startLoading);
+  const setPostsResult = usePostsStore((state) => state.setPostsResult);
+  const setPostsError = usePostsStore((state) => state.setPostsError);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadPosts() {
       try {
-        setIsLoading(true);
-        setError("");
+        startLoading();
 
         const response = await fetch(buildPostsUrl(activeFilters, page));
 
@@ -81,22 +72,18 @@ function PostsPageContent({ activeFilters, page }: PostsPageContentProps) {
         const data = (await response.json()) as Post[];
 
         if (isMounted) {
-          setPosts(data);
-          setTotalCount(
+          setPostsResult(
+            data,
             parseTotalCount(response.headers.get("x-total-count"), data.length),
           );
         }
       } catch (fetchError) {
         if (isMounted) {
-          setError(
+          setPostsError(
             fetchError instanceof Error
               ? fetchError.message
               : "Something went wrong while loading posts.",
           );
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
         }
       }
     }
@@ -106,21 +93,14 @@ function PostsPageContent({ activeFilters, page }: PostsPageContentProps) {
     return () => {
       isMounted = false;
     };
-  }, [activeFilters, page]);
+  }, [activeFilters, page, setPostsError, setPostsResult, startLoading]);
 
-  const totalPages = getTotalPages(totalCount) as number;
-  const pageNumbers = useMemo(
-    () => createPageNumbers(totalPages) as number[],
-    [totalPages],
-  );
-
-  function handleSubmit() {
-    router.push(buildPostsPagePath(draftFilters, 1));
+  function handleSubmit(filters: PostFilters) {
+    router.push(buildPostsPagePath(filters, 1));
   }
 
   function handleReset() {
-    setDraftFilters(initialFilters);
-    router.push(buildPostsPagePath(initialFilters, 1));
+    router.push(buildPostsPagePath(EMPTY_POST_FILTERS, 1));
   }
 
   function handlePageChange(nextPage: number) {
@@ -128,23 +108,19 @@ function PostsPageContent({ activeFilters, page }: PostsPageContentProps) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-base-200 px-4 py-8 text-base-content sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <FilterForm
-          filters={draftFilters}
+          filters={activeFilters}
           isLoading={isLoading}
-          onChange={setDraftFilters}
           onReset={handleReset}
           onSubmit={handleSubmit}
         />
 
-        <PostsTable error={error} isLoading={isLoading} posts={posts} />
+        <PostsTable />
 
         <Pagination
           currentPage={page}
-          isDisabled={isLoading || Boolean(error)}
-          pageNumbers={pageNumbers}
-          totalPages={totalPages}
           onPageChange={handlePageChange}
         />
       </div>

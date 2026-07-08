@@ -2,6 +2,12 @@ import type { PostFilters } from "../types/posts";
 
 export const POSTS_PER_PAGE = 10;
 export const POSTS_API_URL = "https://jsonplaceholder.typicode.com/posts";
+export const EMPTY_POST_FILTERS: PostFilters = {
+  userId: "",
+  postId: "",
+  title: "",
+  body: "",
+};
 
 type SearchParamsReader = Pick<URLSearchParams, "get">;
 

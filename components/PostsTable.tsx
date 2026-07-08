@@ -1,17 +1,15 @@
-import type { Post } from "@/types/posts";
+import { usePostsStore } from "@/stores/posts-store";
 
-type PostsTableProps = {
-  error: string;
-  isLoading: boolean;
-  posts: Post[];
-};
+export function PostsTable() {
+  const posts = usePostsStore((state) => state.posts);
+  const isLoading = usePostsStore((state) => state.isLoading);
+  const error = usePostsStore((state) => state.error);
 
-export function PostsTable({ error, isLoading, posts }: PostsTableProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-lg border border-base-300 bg-base-100 shadow-sm">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-          <thead className="bg-slate-100 text-xs uppercase tracking-[0.12em] text-slate-600">
+        <table className="table min-w-full text-left text-sm">
+          <thead className="bg-base-200 text-xs uppercase tracking-[0.12em]">
             <tr>
               <th className="w-20 px-4 py-3 font-semibold">ID</th>
               <th className="w-28 px-4 py-3 font-semibold">User</th>
@@ -19,12 +17,12 @@ export function PostsTable({ error, isLoading, posts }: PostsTableProps) {
               <th className="min-w-96 px-4 py-3 font-semibold">Body</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-base-200">
             {isLoading &&
               Array.from({ length: 8 }, (_, index) => (
                 <tr key={index}>
                   <td className="px-4 py-4" colSpan={4}>
-                    <div className="h-4 animate-pulse rounded bg-slate-200" />
+                    <div className="skeleton h-4 w-full" />
                   </td>
                 </tr>
               ))}
@@ -32,17 +30,17 @@ export function PostsTable({ error, isLoading, posts }: PostsTableProps) {
             {!isLoading &&
               !error &&
               posts.map((post) => (
-                <tr key={post.id} className="align-top hover:bg-slate-50">
-                  <td className="px-4 py-4 font-medium text-slate-900">
+                <tr key={post.id} className="align-top hover:bg-base-200">
+                  <td className="px-4 py-4 font-medium">
                     {post.id}
                   </td>
-                  <td className="px-4 py-4 text-slate-600">
+                  <td className="px-4 py-4 opacity-70">
                     User {post.userId}
                   </td>
-                  <td className="px-4 py-4 font-medium text-slate-900">
+                  <td className="px-4 py-4 font-medium">
                     {post.title}
                   </td>
-                  <td className="px-4 py-4 leading-6 text-slate-600">
+                  <td className="px-4 py-4 leading-6 opacity-70">
                     {post.body}
                   </td>
                 </tr>
@@ -52,13 +50,13 @@ export function PostsTable({ error, isLoading, posts }: PostsTableProps) {
       </div>
 
       {error && (
-        <div className="border-t border-red-100 bg-red-50 px-4 py-8 text-center text-sm font-medium text-red-700">
+        <div className="alert alert-error rounded-none border-x-0 border-b-0 text-sm font-medium">
           {error}
         </div>
       )}
 
       {!isLoading && !error && posts.length === 0 && (
-        <div className="border-t border-slate-100 px-4 py-10 text-center text-sm text-slate-600">
+        <div className="alert rounded-none border-x-0 border-b-0 justify-center text-sm">
           No posts match the selected filters.
         </div>
       )}

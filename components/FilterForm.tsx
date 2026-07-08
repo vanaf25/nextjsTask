@@ -1,14 +1,14 @@
-import { FormEvent } from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
+import { EMPTY_POST_FILTERS } from "@/utils/posts";
 import type { PostFilters } from "@/types/posts";
 
 type FilterFormProps = {
   filters: PostFilters;
   isLoading: boolean;
-  onChange: (filters: PostFilters) => void;
   onReset: () => void;
-  onSubmit: () => void;
+  onSubmit: (filters: PostFilters) => void;
 };
 
 const userIds = Array.from({ length: 10 }, (_, index) => index + 1);
@@ -16,108 +16,89 @@ const userIds = Array.from({ length: 10 }, (_, index) => index + 1);
 export function FilterForm({
   filters,
   isLoading,
-  onChange,
   onReset,
   onSubmit,
 }: FilterFormProps) {
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    onSubmit();
+  const { handleSubmit, register, reset } = useForm<PostFilters>({
+    values: filters,
+  });
+
+  function handleReset() {
+    reset(EMPTY_POST_FILTERS);
+    onReset();
   }
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <form
-        className="grid gap-4 lg:grid-cols-[180px_180px_minmax(220px,1fr)_minmax(220px,1fr)_auto_auto]"
-        onSubmit={handleSubmit}
-      >
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          User
-          <select
-            className="h-11 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-            value={filters.userId}
-            onChange={(event) =>
-              onChange({
-                ...filters,
-                userId: event.target.value,
-              })
-            }
+    <section className="card border border-base-300 bg-base-100 shadow-sm">
+      <div className="card-body p-4">
+        <form
+          className="grid gap-4 lg:grid-cols-[180px_180px_minmax(220px,1fr)_minmax(220px,1fr)_auto_auto]"
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <label className="form-control flex flex-col gap-2 text-sm font-medium">
+            User
+            <select
+              className="select select-bordered h-11 w-full"
+              {...register("userId")}
+            >
+              <option value="">All users</option>
+              {userIds.map((userId) => (
+                <option key={userId} value={userId}>
+                  User {userId}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="form-control flex flex-col gap-2 text-sm font-medium">
+            Post ID
+            <TextInput
+              min="1"
+              placeholder="Any post"
+              type="number"
+              {...register("postId")}
+            />
+          </label>
+
+          <label className="form-control flex flex-col gap-2 text-sm font-medium">
+            Title
+            <TextInput
+              placeholder="Search title"
+              type="search"
+              {...register("title")}
+            />
+          </label>
+
+          <label className="form-control flex flex-col gap-2 text-sm font-medium">
+            Body
+            <TextInput
+              placeholder="Search body"
+              type="search"
+              {...register("body")}
+            />
+          </label>
+
+          <Button
+            className="self-end"
+            disabled={isLoading}
+            size="md"
+            type="submit"
+            variant="primary"
           >
-            <option value="">All users</option>
-            {userIds.map((userId) => (
-              <option key={userId} value={userId}>
-                User {userId}
-              </option>
-            ))}
-          </select>
-        </label>
+            Filter
+          </Button>
 
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Post ID
-          <TextInput
-            min="1"
-            placeholder="Any post"
-            type="number"
-            value={filters.postId}
-            onChange={(event) =>
-              onChange({
-                ...filters,
-                postId: event.target.value,
-              })
-            }
-          />
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Title
-          <TextInput
-            placeholder="Search title"
-            type="search"
-            value={filters.title}
-            onChange={(event) =>
-              onChange({
-                ...filters,
-                title: event.target.value,
-              })
-            }
-          />
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Body
-          <TextInput
-            placeholder="Search body"
-            type="search"
-            value={filters.body}
-            onChange={(event) =>
-              onChange({
-                ...filters,
-                body: event.target.value,
-              })
-            }
-          />
-        </label>
-
-        <Button
-          className="self-end"
-          disabled={isLoading}
-          size="md"
-          type="submit"
-          variant="primary"
-        >
-          Filter
-        </Button>
-
-        <Button
-          className="self-end"
-          disabled={isLoading}
-          size="md"
-          type="button"
-          onClick={onReset}
-        >
-          Reset
-        </Button>
-      </form>
+          <Button
+            className="self-end"
+            disabled={isLoading}
+            size="md"
+            type="button"
+            onClick={handleReset}
+          >
+            Reset
+          </Button>
+        </form>
+      </div>
     </section>
   );
 }

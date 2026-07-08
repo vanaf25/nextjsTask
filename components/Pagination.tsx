@@ -1,26 +1,33 @@
+import { useMemo } from "react";
 import { Button } from "@/components/ui/Button";
+import { usePostsStore } from "@/stores/posts-store";
+import { createPageNumbers, getTotalPages } from "@/utils/posts";
 
 type PaginationProps = {
   currentPage: number;
-  isDisabled: boolean;
   onPageChange: (page: number) => void;
-  pageNumbers: number[];
-  totalPages: number;
 };
 
 export function Pagination({
   currentPage,
-  isDisabled,
   onPageChange,
-  pageNumbers,
-  totalPages,
 }: PaginationProps) {
+  const totalCount = usePostsStore((state) => state.totalCount);
+  const isLoading = usePostsStore((state) => state.isLoading);
+  const error = usePostsStore((state) => state.error);
+  const isDisabled = isLoading || Boolean(error);
+  const totalPages = getTotalPages(totalCount);
+  const pageNumbers = useMemo(
+    () => createPageNumbers(totalPages),
+    [totalPages],
+  );
+
   return (
     <nav
       aria-label="Posts pagination"
-      className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white px-4 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+      className="card flex flex-col gap-3 border border-base-300 bg-base-100 px-4 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
     >
-      <p className="text-sm text-slate-600">
+      <p className="text-sm opacity-70">
         Page {currentPage} of {totalPages}
       </p>
       <div className="flex flex-wrap items-center gap-2">
