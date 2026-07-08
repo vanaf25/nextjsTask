@@ -1,5 +1,6 @@
 import { FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
+import { TextInput } from "@/components/ui/TextInput";
 import type { PostFilters } from "@/types/posts";
 
 type FilterFormProps = {
@@ -27,7 +28,7 @@ export function FilterForm({
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <form
-        className="grid gap-4 lg:grid-cols-[220px_220px_auto_auto]"
+        className="grid gap-4 lg:grid-cols-[180px_180px_minmax(220px,1fr)_minmax(220px,1fr)_auto_auto]"
         onSubmit={handleSubmit}
       >
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
@@ -53,8 +54,7 @@ export function FilterForm({
 
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
           Post ID
-          <input
-            className="h-11 rounded-md border border-slate-300 px-3 text-sm text-slate-950 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+          <TextInput
             min="1"
             placeholder="Any post"
             type="number"
@@ -63,6 +63,36 @@ export function FilterForm({
               onChange({
                 ...filters,
                 postId: event.target.value,
+              })
+            }
+          />
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          Title
+          <TextInput
+            placeholder="Search title"
+            type="search"
+            value={filters.title}
+            onChange={(event) =>
+              onChange({
+                ...filters,
+                title: event.target.value,
+              })
+            }
+          />
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          Body
+          <TextInput
+            placeholder="Search body"
+            type="search"
+            value={filters.body}
+            onChange={(event) =>
+              onChange({
+                ...filters,
+                body: event.target.value,
               })
             }
           />

@@ -8,4 +8,6 @@ export type Post = {
 export type PostFilters = {
   userId: string;
   postId: string;
+  title: string;
+  body: string;
 };

@@ -12,7 +12,9 @@ import {
 } from "../utils/posts.ts";
 
 test("buildPostsUrl includes pagination params", () => {
-  const url = new URL(buildPostsUrl({ userId: "", postId: "" }, 2, 10));
+  const url = new URL(
+    buildPostsUrl({ userId: "", postId: "", title: "", body: "" }, 2, 10),
+  );
 
   assert.equal(url.origin + url.pathname, POSTS_API_URL);
   assert.equal(url.searchParams.get("_page"), "2");
@@ -20,18 +22,30 @@ test("buildPostsUrl includes pagination params", () => {
 });
 
 test("buildPostsUrl applies supported API filters", () => {
-  const url = new URL(buildPostsUrl({ userId: "3", postId: "25" }, 1, 10));
+  const url = new URL(
+    buildPostsUrl(
+      { userId: "3", postId: "25", title: "qui", body: "dolor" },
+      1,
+      10,
+    ),
+  );
 
   assert.equal(url.searchParams.get("userId"), "3");
   assert.equal(url.searchParams.get("id"), "25");
+  assert.equal(url.searchParams.get("title_like"), "qui");
+  assert.equal(url.searchParams.get("body_like"), "dolor");
 });
 
 test("getFiltersFromSearchParams reads supported page filters", () => {
-  const searchParams = new URLSearchParams("userId=3&postId=25");
+  const searchParams = new URLSearchParams(
+    "userId=3&postId=25&title=qui&body=dolor",
+  );
 
   assert.deepEqual(getFiltersFromSearchParams(searchParams), {
     userId: "3",
     postId: "25",
+    title: "qui",
+    body: "dolor",
   });
 });
 
@@ -42,10 +56,16 @@ test("getPageFromSearchParams falls back to the first page", () => {
 });
 
 test("buildPostsPagePath includes only active URL params", () => {
-  assert.equal(buildPostsPagePath({ userId: "", postId: "" }, 1), "/");
   assert.equal(
-    buildPostsPagePath({ userId: "3", postId: "25" }, 2),
-    "/?userId=3&postId=25&page=2",
+    buildPostsPagePath({ userId: "", postId: "", title: "", body: "" }, 1),
+    "/",
+  );
+  assert.equal(
+    buildPostsPagePath(
+      { userId: "3", postId: "25", title: "qui", body: "dolor" },
+      2,
+    ),
+    "/?userId=3&postId=25&title=qui&body=dolor&page=2",
   );
 });
 

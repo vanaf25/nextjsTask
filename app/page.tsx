@@ -19,6 +19,8 @@ import type { Post, PostFilters } from "@/types/posts";
 const initialFilters: PostFilters = {
   userId: "",
   postId: "",
+  title: "",
+  body: "",
 };
 
 export default function Home() {

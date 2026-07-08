@@ -13,6 +13,8 @@ export function buildPostsUrl(
   const url = new URL(POSTS_API_URL);
   const userId = filters.userId.trim();
   const postId = filters.postId.trim();
+  const title = filters.title.trim();
+  const body = filters.body.trim();
 
   url.searchParams.set("_page", String(page));
   url.searchParams.set("_limit", String(pageSize));
@@ -25,6 +27,14 @@ export function buildPostsUrl(
     url.searchParams.set("id", postId);
   }
 
+  if (title) {
+    url.searchParams.set("title_like", title);
+  }
+
+  if (body) {
+    url.searchParams.set("body_like", body);
+  }
+
   return url.toString();
 }
 
@@ -34,6 +44,8 @@ export function getFiltersFromSearchParams(
   return {
     userId: searchParams.get("userId") ?? "",
     postId: searchParams.get("postId") ?? "",
+    title: searchParams.get("title") ?? "",
+    body: searchParams.get("body") ?? "",
   };
 }
 
@@ -47,6 +59,8 @@ export function buildPostsPagePath(filters: PostFilters, page: number) {
   const searchParams = new URLSearchParams();
   const userId = filters.userId.trim();
   const postId = filters.postId.trim();
+  const title = filters.title.trim();
+  const body = filters.body.trim();
 
   if (userId) {
     searchParams.set("userId", userId);
@@ -54,6 +68,14 @@ export function buildPostsPagePath(filters: PostFilters, page: number) {
 
   if (postId) {
     searchParams.set("postId", postId);
+  }
+
+  if (title) {
+    searchParams.set("title", title);
+  }
+
+  if (body) {
+    searchParams.set("body", body);
   }
 
   if (page > 1) {
